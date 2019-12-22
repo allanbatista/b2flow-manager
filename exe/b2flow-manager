@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require "b2flow/manager/executor"
+
+B2flow::Manager::Executor.new.run
