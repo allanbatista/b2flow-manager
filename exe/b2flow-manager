@@ -1,5 +1,23 @@
 #!/usr/bin/env ruby
 
+require 'json'
 require "b2flow/manager/executor"
+
+jobs = {
+    job1: {
+
+    },
+    job2: {
+
+    },
+    job3: {
+        depends: ['job1']
+    },
+    job4: {
+        depends: ['job2', 'job3']
+    }
+}
+
+ENV.update({"B2FLOW__DAG__CONFIG" => {jobs: jobs}.to_json})
 
 B2flow::Manager::Executor.new.run

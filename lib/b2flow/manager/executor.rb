@@ -1,6 +1,7 @@
 require 'json'
 require 'zip'
 require 'b2flow/service/kube'
+require 'b2flow/manager/dag'
 
 module B2flow
   module Manager
@@ -23,17 +24,11 @@ module B2flow
       end
 
       def run
-        @config['jobs'].keys.each do |job_name|
-          config = @config['jobs'][job_name]
-          puts config
+        dag = B2flow::Manager::Dag.new(@config['jobs'])
 
-          if config['engine'] == 'python'
-            submit(job_name)
-            # Kube
-            # puts read_python(job_name)
-          end
+        loop do
+          break if dag.execute
         end
-
       end
 
       def submit(job_name)
