@@ -1,12 +1,15 @@
+require 'b2flow/service/api_request'
+require 'b2flow/service/api_response'
+
 module B2flow
   module Service
-    class ApiSdl
-      attr_reader :connection
+    class ApiClient
+      attr_reader :client
 
       DEFAULTS = {path: "/", params: {}, headers: {}, body: {}}
 
-      def initialize(connection, options = {})
-        @connection = connection
+      def initialize(client, options = {})
+        @client = client
         @arguments = DEFAULTS.merge(options)
       end
 
@@ -14,32 +17,28 @@ module B2flow
         _path = @arguments[:path]
         _path = File.join(@arguments[:path], path) if !(path.nil? || path == "")
 
-        ApiSdl.new(connection, @arguments.merge({path: _path}))
+        B2flow::Service::ApiClient.new(client, @arguments.merge({path: _path}))
       end
 
       def params(params)
         _params = @arguments[:params]
-        _params = @arguments[:params].merge(params) if !(params.nil || params.empty?)
+        _params = @arguments[:params].merge(params) if !(params.nil? || params.empty?)
 
-        ApiSdl.new(connection, @arguments.merge({params: _params}))
+        B2flow::Service::ApiClient.new(client, @arguments.merge({params: _params}))
       end
 
       def headers(headers)
         _headers = @arguments[:headers]
         _headers = @arguments[:headers].merge(headers) if !(headers.nil? || headers.emtpy?)
 
-        ApiSdl.new(connection, @arguments.merge({headers: _headers}))
+        B2flow::Service::ApiClient.new(client, @arguments.merge({headers: _headers}))
       end
 
       def body(body)
         _body = @arguments[:body]
         _body = @arguments[:body].merge(body) if !(body.nil? || body.empty?)
 
-        ApiSdl.new(connection, @arguments.merge({body: _body}))
-      end
-
-      def final_uri
-        [@arguments[:path], @arguments[:params]].filter(&:nil?).join("?")
+        B2flow::Service::ApiClient.new(client, @arguments.merge({body: _body}))
       end
 
       def get
@@ -65,14 +64,9 @@ module B2flow
       private
 
       def action(method)
-        response = connection.send(method, final_uri) do |f|
-          f.headers = f.headers.merge(@arguments[:headers])
-          f.body = @arguments[:body].to_json if @arguments[:body].present?
-        end
-
-        ApiResponse.new(response)
+        request = B2flow::Service::ApiRequest.new(client, @arguments.merge(method: method))
+        request.execute
       end
-
     end
   end
 end

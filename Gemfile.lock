@@ -25,19 +25,17 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
     rspec-support (3.9.0)
-    rubyzip (2.0.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   b2flow-manager!
-  bundler (~> 1.17)
+  bundler
   faraday
   rake (~> 10.0)
   recursive-open-struct
   rspec (~> 3.0)
-  rubyzip
 
 BUNDLED WITH
    1.17.3

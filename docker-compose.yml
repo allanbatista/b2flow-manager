@@ -1,0 +1,10 @@
+version: "3.5"
+
+services:
+  b2flow-manager:
+    build:
+      context: ./
+    network_mode: host
+    environment:
+      B2FLOW__KUBERNETES__URI: "http://localhost:8080"
+      B2FLOW__DAG__CONFIG: '{"name":"x-dag","config":{"EXAMPLE": "1"},"team":"x-team","project":"x-project","jobs":[{"name":"job_name","depends":[],"full_name":"x-team_x-project_x-dag_job_name","version":1577984308,"engine":{"cpu":2,"memory":4096,"type":"DockerEngine"},"image":"gcr.io/eco-league-244218/x-team_x-project_x-dag_job_name:1577984308"}]}'

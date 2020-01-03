@@ -3,22 +3,63 @@ require 'b2flow/manager/node'
 module B2flow
   module Manager
     class Dag
-      def initialize(jobs)
-        @graph = build_graph(jobs)
+      attr_reader :config, :graph
+
+      def initialize(config)
+        @config = config
+        @graph = build_graph
       end
 
       def executable_nodes
         @graph.values.select(&:executable?)
       end
 
+      def running_nodes
+        @graph.values.select(&:running?)
+      end
+
+      def pending_nodes
+        @graph.values.select(&:pending?)
+      end
+
+      def any_error?
+        @graph.values.map(&:fail?).any?
+      end
+
       def execute
-        executable_nodes.each do |node|
+        loop do
+          executable_nodes.each do |node|
+            puts "executing #{node.name}"
+            node.execute
+          end
+
+          running_nodes.each do |node|
+            node.check!
+          end
+
+          if any_error?
+            puts "Any Fail"
+            pending_nodes.map(&:cancel!)
+            running_nodes.map(&:cancel!)
+            break
+          end
+
+          break if all_complete?
+
+          puts "Waiting next round!"
           sleep 1
-          puts "executed #{node.name}"
-          node.success!
         end
 
-        all_complete?
+
+        puts " ================== EXECUTE RESUME (#{success? ? "success" : "fail"}) =================="
+        @graph.each do |job_name, node|
+          # node.purge!
+          puts "#{job_name}: #{node.status}"
+        end
+      end
+
+      def success?
+        @graph.values.map(&:success?).all?
       end
 
       def all_complete?
@@ -30,16 +71,12 @@ module B2flow
         return true
       end
 
-      def build_graph(jobs)
+      def build_graph
         graphs = {}
 
-        jobs.keys.each do |name|
-          inject_build(jobs, name)
-        end
-
-        jobs.keys.each do |name|
-          node = Node.new(name.to_s, jobs[name])
-          graphs[name.to_s] = node
+        config.jobs.each do |job|
+          node = Node.new(job.name, job, self)
+          graphs[job.name] = node
         end
 
         graphs.values.each do |node|
@@ -51,22 +88,6 @@ module B2flow
         end
 
         graphs
-      end
-
-      def inject_build(jobs, name)
-        build_name = "__build_#{name}"
-
-        jobs[build_name] = {
-            engine: '__build'
-        }
-
-        if jobs[name][:depends].nil?
-          jobs[name][:depends] = [build_name]
-        elsif jobs[name][:depends].is_a?(Array)
-          jobs[name][:depends] = [build_name] + jobs[name][:depends]
-        else
-          jobs[name][:depends] = [build_name, jobs[name][:depends]]
-        end
       end
     end
   end

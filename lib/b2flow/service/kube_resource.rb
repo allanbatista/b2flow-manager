@@ -7,11 +7,11 @@ module B2flow
         @api_client = api_client.route("#{api_version}/namespaces/#{namespace_name}/#{resource_name}")
       end
 
-      def list
-        api_client.get
+      def list(params={})
+        api_client.params(params).get
       end
 
-      def get(name)
+      def find(name)
         api_client.route(name).get
       end
 
@@ -23,16 +23,37 @@ module B2flow
         api_client.route(name).body(resource).put
       end
 
-      def delete(name)
-        api_client.route(name).delete
+      def delete(name, params={})
+        api_client.params(params).route(name).delete
+      end
+
+      def forceDelete(name)
+        delete(name, gracePeriodSeconds: 0)
       end
 
       def create_or_replace(name, resource)
-        if get(name).success?
+        if find(name).success?
           replace(name, resource)
         else
           create(resource)
         end
+      end
+
+      def delete_and_create(name, resource, max_attempts=3)
+        attempts = 1
+        response = nil
+
+        loop do
+          puts "training to create resource - attempts #{attempts}"
+          delete(name) if find(name).success?
+          response = create(resource)
+
+          attempts += 1
+          break if response.success? or attempts > max_attempts
+          sleep 1
+        end
+
+        response
       end
     end
   end

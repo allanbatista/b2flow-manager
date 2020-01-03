@@ -5,6 +5,6 @@ RUN mkdir -p ${HOME_APP}
 WORKDIR ${HOME_APP}
 COPY . ${HOME_APP}
 
-RUN bundle install
+RUN bundle install --without development test
 
 CMD ["bundle", "exec", "exe/b2flow-manager"]
