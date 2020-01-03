@@ -9,10 +9,10 @@ class B2flow::Manager::Engine::Docker
       "standard-2" => { "cpu" => "3", "memory" => "12Gi" },
       "standard-3" => { "cpu" => "7", "memory" => "27Gi" },
       "standard-4" => { "cpu" => "15", "memory" => "57Gi" },
-      "high-memory-1" => { "cpu" => "1", "memory" => "10Gi" },
-      "high-memory-2" => { "cpu" => "3", "memory" => "23Gi" },
-      "high-memory-3" => { "cpu" => "7", "memory" => "49Gi" },
-      "high-memory-4" => { "cpu" => "15", "memory" => "101Gi" }
+      "high-memory-1" => { "cpu" => "1", "memory" => "9Gi" },
+      "high-memory-2" => { "cpu" => "3", "memory" => "22Gi" },
+      "high-memory-3" => { "cpu" => "7", "memory" => "48Gi" },
+      "high-memory-4" => { "cpu" => "15", "memory" => "100Gi" }
   }
 
   def initialize(node)
@@ -26,7 +26,7 @@ class B2flow::Manager::Engine::Docker
   end
 
   def flavor
-    node.config.flavor || "standard-1"
+    node.config.engine.flavor || "standard-1"
   end
 
   def flavor_cpu
