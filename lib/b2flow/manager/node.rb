@@ -37,8 +37,8 @@ module B2flow
       end
 
       def env
-        dag.config.config.to_h.keys.map do |key|
-          { "name" => key, "value" => dag.config.config[key]}
+        dag.config.environments.to_h.keys.map do |key|
+          { "name" => key, "value" => dag.config.environments[key]}
         end
       end
 

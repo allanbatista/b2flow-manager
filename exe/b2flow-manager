@@ -5,7 +5,7 @@ require "b2flow/manager/executor"
 
 # config = {
 #     "name": "x-dag",
-#     "config": {},
+#     "environments": {},
 #     "team": "x-team",
 #     "project": "x-project",
 #     "jobs": [
