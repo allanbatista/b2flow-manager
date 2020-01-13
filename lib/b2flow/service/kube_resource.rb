@@ -1,3 +1,5 @@
+require 'yaml'
+
 module B2flow
   module Service
     class KubeResource

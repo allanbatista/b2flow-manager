@@ -90,6 +90,27 @@ class B2flow::Manager::Engine::Docker
     B2flow::Service::Kube.jobs.delete(name)
   end
 
+  def resources
+    if flavor.include?('gpu')
+      {
+          limits: {
+              'nvidia.com/gpu': 1
+          }
+      }
+    else
+      {
+          limits: {
+              cpu: flavor_cpu,
+              memory: flavor_memory
+          },
+          requests: {
+              cpu: flavor_cpu,
+              memory: flavor_memory
+          }
+      }
+    end
+  end
+
   def generate_config
     {
       "apiVersion": "batch/v1",
@@ -108,16 +129,7 @@ class B2flow::Manager::Engine::Docker
                 "name": name,
                 "image": node.config.image,
                 "env": node.env,
-                "resources": {
-                  "limits": {
-                    "cpu": flavor_cpu,
-                    "memory": flavor_memory
-                  },
-                  "requests": {
-                    "cpu": flavor_cpu,
-                    "memory": flavor_memory
-                  }
-                }
+                "resources": resources
               }
             ],
             "affinity": {
