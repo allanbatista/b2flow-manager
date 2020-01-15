@@ -1,13 +1,22 @@
+require 'time'
 require 'b2flow/manager/node'
 
 module B2flow
   module Manager
     class Dag
-      attr_reader :config, :graph
+      attr_reader :config, :graph, :id
 
       def initialize(config)
+        @id = SecureRandom.uuid
         @config = config
         @graph = build_graph
+      end
+
+      def metadata
+        {
+            id: @id,
+            started_at: DateTime.now.to_s
+        }
       end
 
       def executable_nodes

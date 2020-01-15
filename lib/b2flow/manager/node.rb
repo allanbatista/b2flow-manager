@@ -1,12 +1,15 @@
 require 'json'
+require 'time'
+require 'securerandom'
 require 'b2flow/manager/engine'
 
 module B2flow
   module Manager
     class Node
-      attr_reader :name, :engine, :dag, :config, :messages, :status
+      attr_reader :id, :name, :engine, :dag, :config, :messages, :status
 
       def initialize(name, config, dag)
+        @id = SecureRandom.uuid
         @name = name
         @config = config
         @dag = dag
@@ -36,10 +39,28 @@ module B2flow
         engine.purge!
       end
 
+      def metadata
+        {
+            dag: dag.metadata,
+            job: {
+                id: id,
+                name: name,
+                started_at: DateTime.now.to_s
+            }
+        }
+      end
+
       def env
-        dag.config.environments.to_h.keys.map do |key|
+        envs = dag.config.environments.to_h.keys.map do |key|
           { "name" => key, "value" => dag.config.environments[key]}
         end
+
+        envs << {
+            "name" => "__METADATA__",
+            "value" => metadata.to_json
+        }
+
+        envs
       end
 
       def engine_name
